@@ -2,57 +2,42 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#define URL "agenda.txt"
+#include <locale.h>
 
-typedef struct { // estruct para agenda
-    char nome[60];
-    char telefone[30];
+typedef struct{
+	char nome[30];
+	char telefone[20];
 }Agenda;
 
-void abreAgenda(Agenda *agenda){
-    FILE *file; // define ponteiro para arquivo
-    file = fopen( URL, "a"); // abre arquivo
-    if( file == NULL){ // Testa se arquivo abriu corretamente
-        perror("Erro ao abrir arquivo!\n");
-        return;
-    }
-
-    fprintf(file, "Nome: %s, Telefone: %s\n", agenda->nome, agenda->telefone);
-    fclose(file);
-}
-
-void RecebeDadoUsuario(Agenda *agenda){
-    // recebe dados do usuario
-    printf("Digite o nome do Contato: ");
-    fgets(agenda->nome, sizeof(agenda->nome), stdin);
-    agenda->nome[strcspn(agenda->nome, "\n")] = '\0';
-    printf("Digite o telefone: ");
-    fgets(agenda->telefone, sizeof(agenda->telefone), stdin);
-    agenda->telefone[strcspn(agenda->telefone, "\n")] = '\0';
-
-}    
 
 int main(){
-    Agenda *agenda = malloc(sizeof(Agenda));
-            if(agenda == NULL){
-            perror("Erro ao alocar memoria\n");
-            return 1;
-        }
-    int op = 0;
+	setlocale(LC_ALL, "portuguese");
+	
+	Agenda *agenda = malloc(sizeof(Agenda));
+	
+	char ler[100];
+	int i=0;
 
-    while ( op == 0 ){
-        RecebeDadoUsuario(agenda);
-        abreAgenda(agenda);
+	FILE *file = fopen("agenda.txt", "a+");
+	
+	if( file == NULL ){
+		perror("Erro ao abrir arquivo");
+	}
 
-        printf("Cadastro realizado com sucesso!\n");
-        system("clear");
-        //printf("Nome contato: %s\n", agenda->nome);
-        //printf("Telefone: %s\n", agenda->telefone);
-        printf("0=SIM  1=NAO\n\nDeseja cadastrar mais um? \n");
-        scanf(" %i", &op);
-                while(getchar() != '\n' && !feof(stdin)); // limpa o buffer do teclado apos ler um inteiro
-    }
+	printf("\nDigite o nome: ");
+	fgets(agenda->nome, sizeof(agenda->nome), stdin);
+	fflush(stdin);
+	printf("\nDigite o telefone: ");
+	fgets(agenda->telefone, sizeof(agenda->telefone), stdin);
+	fflush(stdin);
+	fprintf(file, "\nNome: %sTelefone: %s\n", agenda->nome, agenda->telefone);
+	printf("\nContato agendado com sucesso\n");
 
-    free(agenda);
-    return 0;
+	while( fgets(ler, sizeof(ler), file )){
+		printf("%s", ler);
+	}
+
+	fclose(file);
+	
+	return 0;
 }
